@@ -1,0 +1,7 @@
+LOOP 50:
+  IF FRONT_CLEAR:
+    MOVE
+  ELSE:
+    RIGHT
+  ENDIF
+ENDLOOP 
