@@ -114,6 +114,9 @@ ENDLOOP""",
   ELSE:
     RIGHT
   ENDIF
+  IF AT_EXIT:
+    END
+  ENDIF
 ENDLOOP""",
             "map": createCorridorWithTurn(),
             "start": (1, 1),

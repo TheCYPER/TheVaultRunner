@@ -373,16 +373,39 @@ class Parser:
         return LoopStatementNode(loop_token, times, body)
     
     def parse_condition(self) -> ConditionNode:
-        """Parse condition expression"""
+        """Parse condition expression supporting NOT, AND, OR with precedence"""
+        return self.parse_or_condition()
+    
+    def parse_or_condition(self) -> ConditionNode:
+        left = self.parse_and_condition()
+        while self.peek().type == TokenType.OR:
+            op_token = self.advance()
+            right = self.parse_and_condition()
+            left = ConditionNode(op_token, "OR", left, right)
+        return left
+    
+    def parse_and_condition(self) -> ConditionNode:
+        left = self.parse_not_condition()
+        while self.peek().type == TokenType.AND:
+            op_token = self.advance()
+            right = self.parse_not_condition()
+            left = ConditionNode(op_token, "AND", left, right)
+        return left
+    
+    def parse_not_condition(self) -> ConditionNode:
+        token = self.peek()
+        if token.type == TokenType.NOT:
+            op_token = self.advance()
+            operand = self.parse_not_condition()
+            return ConditionNode(op_token, "NOT", operand)
+        return self.parse_primary_condition()
+    
+    def parse_primary_condition(self) -> ConditionNode:
         token = self.peek()
         
         if token.type in [TokenType.FRONT_CLEAR, TokenType.ON_KEY, TokenType.AT_DOOR, TokenType.AT_EXIT, TokenType.HAVE_KEY]:
             self.advance()
             return ConditionNode(token)
-        elif token.type == TokenType.NOT:
-            self.advance()
-            operand = self.parse_condition()
-            return ConditionNode(token, "NOT", operand)
         elif token.type == TokenType.IDENTIFIER:
             # Check if it's a valid sensor
             if token.value.upper() in ['FRONT_CLEAR', 'ON_KEY', 'AT_DOOR', 'AT_EXIT', 'HAVE_KEY']:
@@ -500,6 +523,10 @@ class Executor:
         """Evaluate condition expression"""
         if condition.operator == "NOT":
             return not self.evaluate_condition(condition.left)
+        if condition.operator == "AND":
+            return self.evaluate_condition(condition.left) and self.evaluate_condition(condition.right)
+        if condition.operator == "OR":
+            return self.evaluate_condition(condition.left) or self.evaluate_condition(condition.right)
         
         # Basic sensor conditions
         if condition.token.type == TokenType.FRONT_CLEAR:
