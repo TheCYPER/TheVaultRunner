@@ -1,8 +1,8 @@
 """
-世界模型模块
+World Model Module
 
-实现2D网格世界，包含地板、墙壁、钥匙、门和出口。
-管理世界状态和机器人位置更新。
+Implements 2D grid world containing floors, walls, keys, doors, and exits.
+Manages world state and robot position updates.
 """
 
 from typing import List, Tuple, Optional
@@ -10,16 +10,16 @@ from enum import Enum
 
 
 class TileType(Enum):
-    """瓦片类型枚举"""
-    FLOOR = "FLOOR"      # 地板
-    WALL = "WALL"        # 墙壁
-    KEY = "KEY"          # 钥匙
-    DOOR = "DOOR"        # 门
-    EXIT = "EXIT"        # 出口
+    """Tile type enumeration"""
+    FLOOR = "FLOOR"      # Floor
+    WALL = "WALL"        # Wall
+    KEY = "KEY"          # Key
+    DOOR = "DOOR"        # Door
+    EXIT = "EXIT"        # Exit
 
 
 class World:
-    """2D网格世界类"""
+    """2D grid world class"""
     
     def __init__(self):
         self.grid: List[List[TileType]] = []
@@ -33,20 +33,20 @@ class World:
         
     def setWorld(self, map_definition: List[List[str]], bot_start: Tuple[int, int], bot_direction: str = "N") -> Tuple['World', dict]:
         """
-        初始化世界地图和机器人初始状态
+        Initialize world map and robot initial state
         
         Args:
-            map_definition: 字符串列表，每个字符串代表一行地图
-            bot_start: 机器人起始位置 (x, y)
-            bot_direction: 机器人初始朝向
+            map_definition: List of strings, each string represents a map row
+            bot_start: Robot starting position (x, y)
+            bot_direction: Robot initial direction
             
         Returns:
-            (world, bot_state): 世界对象和机器人初始状态
+            (world, bot_state): World object and robot initial state
         """
         self.height = len(map_definition)
         self.width = len(map_definition[0]) if map_definition else 0
         
-        # 初始化网格
+        # Initialize grid
         self.grid = []
         for row in map_definition:
             grid_row = []
@@ -65,13 +65,13 @@ class World:
                     grid_row.append(TileType.FLOOR)
             self.grid.append(grid_row)
         
-        # 设置机器人初始状态
+        # Set robot initial state
         self.bot_x, self.bot_y = bot_start
         self.bot_direction = bot_direction
         self.keys_collected = 0
         self.doors_opened = 0
         
-        # 返回机器人初始状态
+        # Return robot initial state
         bot_state = {
             'x': self.bot_x,
             'y': self.bot_y,
@@ -83,65 +83,65 @@ class World:
         return self, bot_state
     
     def getTile(self, x: int, y: int) -> Optional[TileType]:
-        """获取指定位置的瓦片类型"""
+        """Get tile type at specified position"""
         if 0 <= x < self.width and 0 <= y < self.height:
             return self.grid[y][x]
         return None
     
     def getBotPosition(self) -> Tuple[int, int]:
-        """获取机器人当前位置"""
+        """Get robot's current position"""
         return (self.bot_x, self.bot_y)
     
     def getBotDirection(self) -> str:
-        """获取机器人当前朝向"""
+        """Get robot's current direction"""
         return self.bot_direction
     
     def isWall(self, x: int, y: int) -> bool:
-        """检查指定位置是否为墙"""
+        """Check if specified position is a wall"""
         tile = self.getTile(x, y)
         return tile == TileType.WALL
     
     def isKey(self, x: int, y: int) -> bool:
-        """检查指定位置是否有钥匙"""
+        """Check if specified position has a key"""
         tile = self.getTile(x, y)
         return tile == TileType.KEY
     
     def isDoor(self, x: int, y: int) -> bool:
-        """检查指定位置是否为门"""
+        """Check if specified position is a door"""
         tile = self.getTile(x, y)
         return tile == TileType.DOOR
     
     def isExit(self, x: int, y: int) -> bool:
-        """检查指定位置是否为出口"""
+        """Check if specified position is an exit"""
         tile = self.getTile(x, y)
         return tile == TileType.EXIT
     
     def isFloor(self, x: int, y: int) -> bool:
-        """检查指定位置是否为地板"""
+        """Check if specified position is a floor"""
         tile = self.getTile(x, y)
         return tile == TileType.FLOOR
     
     def removeKey(self, x: int, y: int) -> bool:
-        """移除指定位置的钥匙"""
+        """Remove key at specified position"""
         if self.isKey(x, y):
             self.grid[y][x] = TileType.FLOOR
             return True
         return False
     
     def openDoor(self, x: int, y: int) -> bool:
-        """打开指定位置的门"""
+        """Open door at specified position"""
         if self.isDoor(x, y):
             self.grid[y][x] = TileType.FLOOR
             return True
         return False
     
     def getFrontTile(self, bot_x: int, bot_y: int, direction: str) -> Optional[TileType]:
-        """获取机器人前方的瓦片类型"""
+        """Get tile type in front of robot"""
         front_x, front_y = self.getFrontPosition(bot_x, bot_y, direction)
         return self.getTile(front_x, front_y)
     
     def getFrontPosition(self, bot_x: int, bot_y: int, direction: str) -> Tuple[int, int]:
-        """获取机器人前方的位置坐标"""
+        """Get position coordinates in front of robot"""
         if direction == "N":
             return (bot_x, bot_y - 1)
         elif direction == "E":
@@ -154,28 +154,28 @@ class World:
             return (bot_x, bot_y)
     
     def isFrontClear(self, bot_x: int, bot_y: int, direction: str) -> bool:
-        """检查机器人前方是否清晰（不是墙）"""
+        """Check if robot's front is not a wall"""
         front_tile = self.getFrontTile(bot_x, bot_y, direction)
         return front_tile != TileType.WALL
     
     def updateBot(self, new_x: int, new_y: int, new_direction: str):
-        """更新机器人状态"""
+        """Update robot state"""
         self.bot_x = new_x
         self.bot_y = new_y
         self.bot_direction = new_direction
     
     def updateKey(self, x: int, y: int):
-        """更新钥匙状态（移除）"""
+        """Update key state (remove)"""
         self.removeKey(x, y)
         self.keys_collected += 1
     
     def updateDoor(self, x: int, y: int):
-        """更新门状态（打开）"""
+        """Update door state (open)"""
         self.openDoor(x, y)
         self.doors_opened += 1
     
     def printWorld(self):
-        """打印当前世界状态（用于调试）"""
+        """Print current world state (for debugging)"""
         print(f"World ({self.width}x{self.height})")
         print(f"Bot at ({self.bot_x}, {self.bot_y}) facing {self.bot_direction}")
         print(f"Keys collected: {self.keys_collected}")
@@ -185,7 +185,7 @@ class World:
             row_str = ""
             for x in range(self.width):
                 if x == self.bot_x and y == self.bot_y:
-                    # 显示机器人位置和朝向
+                    # Show robot position and direction
                     if self.bot_direction == "N":
                         row_str += "↑"
                     elif self.bot_direction == "E":
@@ -210,9 +210,9 @@ class World:
         print()
 
 
-# 预定义的地图模板
+# Predefined map templates
 def createSimpleCorridor() -> List[List[str]]:
-    """创建简单走廊地图"""
+    """Create simple corridor map"""
     return [
         "WWWWWWWWWW",
         "W........W",
@@ -227,7 +227,7 @@ def createSimpleCorridor() -> List[List[str]]:
     ]
 
 def createCorridorWithTurn() -> List[List[str]]:
-    """创建有转弯的走廊地图"""
+    """Create corridor map with turns"""
     return [
         "WWWWWWWWWW",
         "W........W",
@@ -242,7 +242,7 @@ def createCorridorWithTurn() -> List[List[str]]:
     ]
 
 def createRoomWithKeyAndDoor() -> List[List[str]]:
-    """创建包含钥匙和门的房间地图"""
+    """Create room map with keys and doors"""
     return [
         "WWWWWWWWWW",
         "W........W",
@@ -252,21 +252,21 @@ def createRoomWithKeyAndDoor() -> List[List[str]]:
         "W........W",
         "W........W",
         "W........W",
-        "W........W",
-        "WWWWWWWWWE"
+        "W.......EW",
+        "WWWWWWWWWW"
     ]
 
 def createComplexMaze() -> List[List[str]]:
-    """创建复杂迷宫地图"""
+    """Create complex maze map"""
     return [
         "WWWWWWWWWW",
-        "W.K.....WW",
-        "W.WWWW..WW",
-        "W.WWWW..WW",
-        "W.WWWW..WW",
-        "W.WWWW..WW",
-        "W.WWWW..WW",
-        "W.WWWW..WW",
-        "W....D..WW",
-        "WWWWWWWWWE"
+        "W.K......W",
+        "W.WWWW...W",
+        "W.WDWW...W",
+        "W.W..W...W",
+        "W.WW.W...W",
+        "W.WW.W...W",
+        "W.WW.W...W",
+        "W......E.W",
+        "WWWWWWWWWW"
     ] 

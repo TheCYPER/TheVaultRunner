@@ -1,10 +1,10 @@
 """
-解释器模块
+Interpreter Module
 
-实现迷你编程语言的解释器，包括：
-- Tokenizer: 将源代码字符串分解为token
-- Parser: 解析语法结构并检查约束
-- Executor: 执行解析后的程序
+Implements the interpreter for the mini programming language, including:
+- Tokenizer: Decomposes source code strings into tokens
+- Parser: Parses syntax structures and checks constraints
+- Executor: Executes parsed programs
 """
 
 from typing import List, Dict, Any, Optional, Tuple
@@ -15,15 +15,15 @@ from world import World
 
 
 class TokenType(Enum):
-    """Token类型枚举"""
-    # 动作指令
+    """Token type enumeration"""
+    # Action instructions
     MOVE = "MOVE"
     LEFT = "LEFT"
     RIGHT = "RIGHT"
     PICK = "PICK"
     OPEN = "OPEN"
     
-    # 控制结构
+    # Control structures
     IF = "IF"
     ELSE = "ELSE"
     ENDIF = "ENDIF"
@@ -32,19 +32,19 @@ class TokenType(Enum):
     TIMES = "TIMES"
     END = "END"
     
-    # 传感器
+    # Sensors
     FRONT_CLEAR = "FRONT_CLEAR"
     ON_KEY = "ON_KEY"
     AT_DOOR = "AT_DOOR"
     AT_EXIT = "AT_EXIT"
     HAVE_KEY = "HAVE_KEY"
     
-    # 逻辑操作符
+    # Logical operators
     AND = "AND"
     OR = "OR"
     NOT = "NOT"
     
-    # 其他
+    # Others
     COLON = ":"
     NUMBER = "NUMBER"
     IDENTIFIER = "IDENTIFIER"
@@ -54,7 +54,7 @@ class TokenType(Enum):
 
 
 class Token:
-    """Token类"""
+    """Token class"""
     
     def __init__(self, token_type: TokenType, value: str, line: int, column: int):
         self.type = token_type
@@ -67,30 +67,30 @@ class Token:
 
 
 class NestingDepthExceededError(Exception):
-    """嵌套深度超限异常"""
+    """Nesting depth exceeded exception"""
     pass
 
 
 class LoopLimitExceededError(Exception):
-    """循环上限超限异常"""
+    """Loop limit exceeded exception"""
     pass
 
 
 class InvalidTokenError(Exception):
-    """无效Token异常"""
+    """Invalid token exception"""
     pass
 
 
 class ParserError(Exception):
-    """解析错误异常"""
+    """Parser error exception"""
     pass
 
 
 class Tokenizer:
-    """词法分析器"""
+    """Lexical analyzer"""
     
     def __init__(self):
-        # 定义关键词映射
+        # Define keyword mapping
         self.keywords = {
             'MOVE': TokenType.MOVE,
             'LEFT': TokenType.LEFT,
@@ -114,19 +114,19 @@ class Tokenizer:
             'NOT': TokenType.NOT,
         }
         
-        # 检查关键词数量不超过20个
+        # Check that keyword count doesn't exceed 20
         if len(self.keywords) > 20:
-            raise ValueError(f"关键词数量({len(self.keywords)})超过20个限制")
+            raise ValueError(f"Keyword count ({len(self.keywords)}) exceeds 20 limit")
     
     def tokenize(self, source: str) -> List[Token]:
         """
-        将源代码字符串分解为token列表
+        Decompose source code string into token list
         
         Args:
-            source: 源代码字符串
+            source: Source code string
             
         Returns:
-            List[Token]: token列表
+            List[Token]: Token list
         """
         tokens = []
         line = 1
@@ -136,7 +136,7 @@ class Tokenizer:
         while i < len(source):
             char = source[i]
             
-            # 跳过空白字符
+            # Skip whitespace characters
             if char.isspace():
                 if char == '\n':
                     line += 1
@@ -146,7 +146,7 @@ class Tokenizer:
                 i += 1
                 continue
             
-            # 处理数字
+            # Handle numbers
             if char.isdigit():
                 number = ""
                 start_column = column
@@ -157,7 +157,7 @@ class Tokenizer:
                 tokens.append(Token(TokenType.NUMBER, number, line, start_column))
                 continue
             
-            # 处理标识符和关键词
+            # Handle identifiers and keywords
             if char.isalpha():
                 identifier = ""
                 start_column = column
@@ -166,7 +166,7 @@ class Tokenizer:
                     i += 1
                     column += 1
                 
-                # 检查是否为关键词
+                # Check if it's a keyword
                 if identifier.upper() in self.keywords:
                     token_type = self.keywords[identifier.upper()]
                     tokens.append(Token(token_type, identifier.upper(), line, start_column))
@@ -174,23 +174,23 @@ class Tokenizer:
                     tokens.append(Token(TokenType.IDENTIFIER, identifier, line, start_column))
                 continue
             
-            # 处理冒号
+            # Handle colon
             if char == ':':
                 tokens.append(Token(TokenType.COLON, ':', line, column))
                 i += 1
                 column += 1
                 continue
             
-            # 未知字符
-            raise InvalidTokenError(f"未知字符 '{char}' at line {line}, column {column}")
+            # Unknown character
+            raise InvalidTokenError(f"Unknown character '{char}' at line {line}, column {column}")
         
-        # 添加EOF token
+        # Add EOF token
         tokens.append(Token(TokenType.EOF, '', line, column))
         return tokens
 
 
 class ASTNode:
-    """抽象语法树节点基类"""
+    """Abstract syntax tree node base class"""
     
     def __init__(self, token: Token):
         self.token = token
@@ -198,12 +198,12 @@ class ASTNode:
 
 
 class StatementNode(ASTNode):
-    """语句节点"""
+    """Statement node"""
     pass
 
 
 class IfStatementNode(ASTNode):
-    """IF语句节点"""
+    """IF statement node"""
     
     def __init__(self, token: Token, condition, then_body, else_body=None):
         super().__init__(token)
@@ -213,7 +213,7 @@ class IfStatementNode(ASTNode):
 
 
 class LoopStatementNode(ASTNode):
-    """LOOP语句节点"""
+    """LOOP statement node"""
     
     def __init__(self, token: Token, times: int, body):
         super().__init__(token)
@@ -222,7 +222,7 @@ class LoopStatementNode(ASTNode):
 
 
 class ConditionNode(ASTNode):
-    """条件节点"""
+    """Condition node"""
     
     def __init__(self, token: Token, operator: str = None, left=None, right=None):
         super().__init__(token)
@@ -232,7 +232,7 @@ class ConditionNode(ASTNode):
 
 
 class Parser:
-    """语法分析器"""
+    """Syntax analyzer"""
     
     def __init__(self):
         self.tokens = []
@@ -242,13 +242,13 @@ class Parser:
     
     def parse(self, tokens: List[Token]) -> List[ASTNode]:
         """
-        解析token列表为AST
+        Parse token list into AST
         
         Args:
-            tokens: token列表
+            tokens: Token list
             
         Returns:
-            List[ASTNode]: AST节点列表
+            List[ASTNode]: AST node list
         """
         self.tokens = tokens
         self.current = 0
@@ -263,17 +263,17 @@ class Parser:
     
     def parse_statement(self, nesting_depth: int) -> ASTNode:
         """
-        解析语句
+        Parse statement
         
         Args:
-            nesting_depth: 当前嵌套深度
+            nesting_depth: Current nesting depth
             
         Returns:
-            ASTNode: 解析后的语句节点
+            ASTNode: Parsed statement node
         """
         if nesting_depth > self.max_nesting_depth:
             raise NestingDepthExceededError(
-                f"嵌套深度({nesting_depth})超过限制({self.max_nesting_depth})"
+                f"Nesting depth ({nesting_depth}) exceeds limit ({self.max_nesting_depth})"
             )
         
         token = self.peek()
@@ -301,79 +301,79 @@ class Parser:
             self.advance()
             return StatementNode(token)
         else:
-            raise ParserError(f"意外的token: {token}")
+            raise ParserError(f"Unexpected token: {token}")
     
     def parse_if_statement(self, nesting_depth: int) -> IfStatementNode:
-        """解析IF语句"""
-        if_token = self.advance()  # 消费IF
+        """Parse IF statement"""
+        if_token = self.advance()  # Consume IF
         
-        # 解析条件
+        # Parse condition
         condition = self.parse_condition()
         
-        # 消费冒号
+        # Consume colon
         if self.peek().type != TokenType.COLON:
-            raise ParserError("IF语句后缺少冒号")
+            raise ParserError("IF statement missing colon")
         self.advance()
         
-        # 解析then分支
+        # Parse then branch
         then_body = []
         while not self.is_at_end() and self.peek().type not in [TokenType.ELSE, TokenType.ENDIF]:
             then_body.append(self.parse_statement(nesting_depth + 1))
         
-        # 解析else分支（如果有）
+        # Parse else branch (if exists)
         else_body = None
         if self.peek().type == TokenType.ELSE:
-            self.advance()  # 消费ELSE
+            self.advance()  # Consume ELSE
             if self.peek().type != TokenType.COLON:
-                raise ParserError("ELSE后缺少冒号")
+                raise ParserError("ELSE missing colon")
             self.advance()
             
             else_body = []
             while not self.is_at_end() and self.peek().type != TokenType.ENDIF:
                 else_body.append(self.parse_statement(nesting_depth + 1))
         
-        # 消费ENDIF
+        # Consume ENDIF
         if self.peek().type != TokenType.ENDIF:
-            raise ParserError("IF语句缺少ENDIF")
+            raise ParserError("IF statement missing ENDIF")
         self.advance()
         
         return IfStatementNode(if_token, condition, then_body, else_body)
     
     def parse_loop_statement(self, nesting_depth: int) -> LoopStatementNode:
-        """解析LOOP语句"""
-        loop_token = self.advance()  # 消费LOOP
+        """Parse LOOP statement"""
+        loop_token = self.advance()  # Consume LOOP
         
-        # 解析循环次数
+        # Parse loop count
         if self.peek().type != TokenType.NUMBER:
-            raise ParserError("LOOP语句后缺少数字")
+            raise ParserError("LOOP statement missing number")
         times_token = self.advance()
         times = int(times_token.value)
         
-        # 检查循环上限
+        # Check loop limit
         if times > self.max_loop_iterations:
             raise LoopLimitExceededError(
-                f"循环次数({times})超过上限({self.max_loop_iterations})"
+                f"Loop count ({times}) exceeds limit ({self.max_loop_iterations})"
             )
         
-        # 消费冒号（简化语法，不需要TIMES关键字）
+        # Consume colon (simplified syntax, no TIMES keyword needed)
         if self.peek().type != TokenType.COLON:
-            raise ParserError("LOOP语句后缺少冒号")
+            raise ParserError("LOOP statement missing colon")
         self.advance()
         
-        # 解析循环体
+        # Parse loop body
         body = []
         while not self.is_at_end() and self.peek().type != TokenType.ENDLOOP:
             body.append(self.parse_statement(nesting_depth + 1))
         
-        # 消费ENDLOOP
+        # Consume ENDLOOP
         if self.peek().type != TokenType.ENDLOOP:
-            raise ParserError("LOOP语句缺少ENDLOOP")
+            raise ParserError("LOOP statement missing ENDLOOP")
         self.advance()
         
         return LoopStatementNode(loop_token, times, body)
     
     def parse_condition(self) -> ConditionNode:
-        """解析条件表达式"""
+        """Parse condition expression"""
         token = self.peek()
         
         if token.type in [TokenType.FRONT_CLEAR, TokenType.ON_KEY, TokenType.AT_DOOR, TokenType.AT_EXIT, TokenType.HAVE_KEY]:
@@ -384,70 +384,70 @@ class Parser:
             operand = self.parse_condition()
             return ConditionNode(token, "NOT", operand)
         elif token.type == TokenType.IDENTIFIER:
-            # 检查是否为有效的传感器
+            # Check if it's a valid sensor
             if token.value.upper() in ['FRONT_CLEAR', 'ON_KEY', 'AT_DOOR', 'AT_EXIT', 'HAVE_KEY']:
                 self.advance()
                 return ConditionNode(Token(token.type, token.value.upper(), token.line, token.column))
             else:
-                raise ParserError(f"无效的传感器: {token.value}")
+                raise ParserError(f"Invalid sensor: {token.value}")
         else:
-            raise ParserError(f"意外的条件token: {token}")
+            raise ParserError(f"Unexpected condition token: {token}")
     
     def peek(self) -> Token:
-        """查看当前token"""
+        """Peek at current token"""
         if self.current >= len(self.tokens):
             return self.tokens[-1]
         return self.tokens[self.current]
     
     def advance(self) -> Token:
-        """前进到下一个token"""
+        """Advance to next token"""
         if not self.is_at_end():
             self.current += 1
         return self.tokens[self.current - 1]
     
     def is_at_end(self) -> bool:
-        """检查是否到达末尾"""
+        """Check if reached end"""
         return self.current >= len(self.tokens)
 
 
 class Executor:
-    """执行器"""
+    """Executor"""
     
     def __init__(self, world: World, bot: Bot):
         self.world = world
         self.bot = bot
         self.execution_count = 0
-        self.max_executions = 1000  # 防止无限执行
+        self.max_executions = 1000  # Prevent infinite execution
     
     def execute(self, ast_nodes: List[ASTNode]) -> bool:
         """
-        执行AST节点列表
+        Execute AST node list
         
         Args:
-            ast_nodes: AST节点列表
+            ast_nodes: AST node list
             
         Returns:
-            bool: 执行是否成功
+            bool: Whether execution was successful
         """
         try:
             for node in ast_nodes:
                 if self.execution_count >= self.max_executions:
-                    raise RuntimeError("执行次数超过限制")
+                    raise RuntimeError("Execution count exceeded limit")
                 
                 self.execute_node(node)
                 
-                # 检查是否到达出口
+                # Check if reached exit
                 if self.bot.is_on_exit():
                     return True
                     
         except Exception as e:
-            print(f"执行错误: {e}")
+            print(f"Execution error: {e}")
             return False
         
         return False
     
     def execute_node(self, node: ASTNode):
-        """执行单个AST节点"""
+        """Execute single AST node"""
         if isinstance(node, StatementNode):
             self.execute_statement(node)
         elif isinstance(node, IfStatementNode):
@@ -455,10 +455,10 @@ class Executor:
         elif isinstance(node, LoopStatementNode):
             self.execute_loop_statement(node)
         else:
-            raise RuntimeError(f"未知的节点类型: {type(node)}")
+            raise RuntimeError(f"Unknown node type: {type(node)}")
     
     def execute_statement(self, node: StatementNode):
-        """执行语句节点"""
+        """Execute statement node"""
         token_type = node.token.type
         
         if token_type == TokenType.MOVE:
@@ -472,12 +472,12 @@ class Executor:
         elif token_type == TokenType.OPEN:
             self.bot.open_door()
         elif token_type == TokenType.END:
-            pass  # 程序结束
+            pass  # Program end
         
         self.execution_count += 1
     
     def execute_if_statement(self, node: IfStatementNode):
-        """执行IF语句"""
+        """Execute IF statement"""
         if self.evaluate_condition(node.condition):
             for stmt in node.then_body:
                 self.execute_node(stmt)
@@ -486,22 +486,22 @@ class Executor:
                 self.execute_node(stmt)
     
     def execute_loop_statement(self, node: LoopStatementNode):
-        """执行LOOP语句"""
+        """Execute LOOP statement"""
         for _ in range(node.times):
             for stmt in node.body:
                 self.execute_node(stmt)
-                # 检查是否到达出口
+                # Check if reached exit
                 if self.bot.is_on_exit():
                     break
             if self.bot.is_on_exit():
                 break
     
     def evaluate_condition(self, condition: ConditionNode) -> bool:
-        """评估条件表达式"""
+        """Evaluate condition expression"""
         if condition.operator == "NOT":
             return not self.evaluate_condition(condition.left)
         
-        # 基本传感器条件
+        # Basic sensor conditions
         if condition.token.type == TokenType.FRONT_CLEAR:
             return self.bot.front_is_clear()
         elif condition.token.type == TokenType.ON_KEY:
@@ -517,7 +517,7 @@ class Executor:
 
 
 class Interpreter:
-    """解释器主类"""
+    """Main interpreter class"""
     
     def __init__(self, world: World, bot: Bot):
         self.world = world
@@ -528,33 +528,33 @@ class Interpreter:
     
     def run(self, source: str) -> bool:
         """
-        运行源代码
+        Run source code
         
         Args:
-            source: 源代码字符串
+            source: Source code string
             
         Returns:
-            bool: 执行是否成功
+            bool: Whether execution was successful
         """
         try:
-            # 词法分析
+            # Lexical analysis
             tokens = self.tokenizer.tokenize(source)
             
-            # 语法分析
+            # Syntax analysis
             ast = self.parser.parse(tokens)
             
-            # 执行
+            # Execution
             return self.executor.execute(ast)
             
         except Exception as e:
-            print(f"解释器错误: {e}")
+            print(f"Interpreter error: {e}")
             return False
     
     def get_token_count(self, source: str) -> int:
-        """获取源代码的token数量"""
+        """Get token count of source code"""
         try:
             tokens = self.tokenizer.tokenize(source)
-            # 过滤掉空白和EOF token
+            # Filter out whitespace and EOF tokens
             meaningful_tokens = [t for t in tokens if t.type not in [TokenType.WHITESPACE, TokenType.EOF]]
             return len(meaningful_tokens)
         except:

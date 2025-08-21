@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Vault Runner 主程序
+Vault Runner Main Program
 
-支持运行示例程序和文件，提供命令行接口。
+Supports running example programs and files, provides command line interface.
 """
 
 import sys
@@ -16,80 +16,80 @@ from interpreter import Interpreter
 
 def load_program(file_path: str) -> str:
     """
-    从文件加载程序源代码
+    Load program source code from file
     
     Args:
-        file_path: 程序文件路径
+        file_path: Program file path
         
     Returns:
-        str: 程序源代码
+        str: Program source code
     """
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             return f.read()
     except FileNotFoundError:
-        print(f"错误: 找不到文件 {file_path}")
+        print(f"Error: File not found {file_path}")
         sys.exit(1)
     except Exception as e:
-        print(f"错误: 读取文件失败: {e}")
+        print(f"Error: Failed to read file: {e}")
         sys.exit(1)
 
 
 def run_program(program_source: str, world_map: list, bot_start: tuple, bot_direction: str = "N", verbose: bool = False) -> bool:
     """
-    运行程序
+    Run program
     
     Args:
-        program_source: 程序源代码
-        world_map: 世界地图定义
-        bot_start: 机器人起始位置
-        bot_direction: 机器人起始朝向
-        verbose: 是否详细输出
+        program_source: Program source code
+        world_map: World map definition
+        bot_start: Robot starting position
+        bot_direction: Robot starting direction
+        verbose: Whether to output detailed information
         
     Returns:
-        bool: 程序是否成功执行
+        bool: Whether the program executed successfully
     """
-    # 创建世界
+    # Create world
     world = World()
     world, bot_state = world.setWorld(world_map, bot_start, bot_direction)
     
-    # 创建机器人
+    # Create robot
     bot = Bot(world, bot_state['x'], bot_state['y'], bot_state['direction'])
     
-    # 创建解释器
+    # Create interpreter
     interpreter = Interpreter(world, bot)
     
     if verbose:
-        print("初始世界状态:")
+        print("Initial world state:")
         world.printWorld()
-        print(f"机器人起始位置: ({bot_start[0]}, {bot_start[1]}) 朝向: {bot_direction}")
-        print(f"程序Token数量: {interpreter.get_token_count(program_source)}")
-        print("\n开始执行程序...\n")
+        print(f"Robot starting position: ({bot_start[0]}, {bot_start[1]}) Direction: {bot_direction}")
+        print(f"Program token count: {interpreter.get_token_count(program_source)}")
+        print("\nStarting program execution...\n")
     
-    # 运行程序
+    # Run program
     success = interpreter.run(program_source)
     
     if verbose:
-        print("\n最终世界状态:")
+        print("\nFinal world state:")
         world.printWorld()
-        print(f"机器人最终位置: {bot.get_pose()}")
-        print(f"机器人朝向: {bot.get_direction()}")
-        print(f"是否持有钥匙: {bot.have_key}")
-        print(f"是否成功到达出口: {success}")
+        print(f"Robot final position: {bot.get_pose()}")
+        print(f"Robot direction: {bot.get_direction()}")
+        print(f"Has key: {bot.have_key}")
+        print(f"Successfully reached exit: {success}")
     
     return success
 
 
 def main():
-    """主函数"""
-    parser = argparse.ArgumentParser(description="Vault Runner - 迷你编程语言解释器")
-    parser.add_argument("program", nargs="?", help="程序文件路径或示例名称")
-    parser.add_argument("--verbose", "-v", action="store_true", help="详细输出")
-    parser.add_argument("--list-examples", action="store_true", help="列出可用示例")
+    """Main function"""
+    parser = argparse.ArgumentParser(description="Vault Runner - Mini Programming Language Interpreter")
+    parser.add_argument("program", nargs="?", help="Program file path or example name")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
+    parser.add_argument("--list-examples", action="store_true", help="List available examples")
     
     args = parser.parse_args()
     
-    # 预定义的示例程序
+    # Predefined example programs
     examples = {
         "corridor": {
             "source": """LOOP 50:
@@ -105,7 +105,7 @@ ENDLOOP""",
             "map": createSimpleCorridor(),
             "start": (1, 1),
             "direction": "E",
-            "description": "简单走廊导航 - 右侧优先墙跟随策略"
+            "description": "Simple corridor navigation - Right-wall-following strategy"
         },
         "corridor_turn": {
             "source": """LOOP 50:
@@ -118,7 +118,7 @@ ENDLOOP""",
             "map": createCorridorWithTurn(),
             "start": (1, 1),
             "direction": "S",
-            "description": "有转弯的走廊导航"
+            "description": "Corridor navigation with turns"
         },
         "collect_and_open": {
             "source": """LOOP 50:
@@ -140,33 +140,33 @@ ENDLOOP""",
             "map": createRoomWithKeyAndDoor(),
             "start": (1, 1),
             "direction": "S",
-            "description": "收集钥匙并开门，然后到达出口"
+            "description": "Collect keys and open doors, then reach the exit"
         }
     }
     
     if args.list_examples:
-        print("可用的示例程序:")
+        print("Available example programs:")
         for name, example in examples.items():
             print(f"  {name}: {example['description']}")
         return
     
     if not args.program:
-        print("Vault Runner - 迷你编程语言解释器")
-        print("用法:")
-        print("  python main.py <程序文件>")
-        print("  python main.py <示例名称>")
+        print("Vault Runner - Mini Programming Language Interpreter")
+        print("Usage:")
+        print("  python main.py <program_file>")
+        print("  python main.py <example_name>")
         print("  python main.py --list-examples")
-        print("\n示例:")
+        print("\nExamples:")
         print("  python main.py corridor")
         print("  python main.py examples/collect_and_open.runner")
         return
     
-    # 检查是否为预定义示例
+    # Check if it's a predefined example
     if args.program in examples:
         example = examples[args.program]
-        print(f"运行示例: {args.program}")
-        print(f"描述: {example['description']}")
-        print(f"Token数量: {len(example['source'].split())}")
+        print(f"Running example: {args.program}")
+        print(f"Description: {example['description']}")
+        print(f"Token count: {len(example['source'].split())}")
         print()
         
         success = run_program(
@@ -178,20 +178,20 @@ ENDLOOP""",
         )
         
         if success:
-            print(f"\n✅ 示例 {args.program} 执行成功!")
+            print(f"\n✅ Example {args.program} executed successfully!")
         else:
-            print(f"\n❌ 示例 {args.program} 执行失败!")
+            print(f"\n❌ Example {args.program} execution failed!")
     
     else:
-        # 从文件加载程序
+        # Load program from file
         if not os.path.exists(args.program):
-            print(f"错误: 找不到程序文件 {args.program}")
-            print("可用的示例: " + ", ".join(examples.keys()))
+            print(f"Error: Program file not found {args.program}")
+            print("Available examples: " + ", ".join(examples.keys()))
             return
         
-        print(f"运行程序文件: {args.program}")
+        print(f"Running program file: {args.program}")
         
-        # 根据文件名选择合适的地图
+        # Select appropriate map based on filename
         if "corridor" in args.program.lower():
             world_map = createSimpleCorridor()
             bot_start = (1, 1)
@@ -216,9 +216,9 @@ ENDLOOP""",
         )
         
         if success:
-            print(f"\n✅ 程序 {args.program} 执行成功!")
+            print(f"\n✅ Program {args.program} executed successfully!")
         else:
-            print(f"\n❌ 程序 {args.program} 执行失败!")
+            print(f"\n❌ Program {args.program} execution failed!")
 
 
 if __name__ == "__main__":
