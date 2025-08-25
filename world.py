@@ -245,10 +245,10 @@ def createRoomWithKeyAndDoor() -> List[List[str]]:
     """Create room map with keys and doors"""
     return [
         "WWWWWWWWWW",
+        "W..K.....W",
         "W........W",
-        "W.K......W",
+        "W.......DW",
         "W........W",
-        "W....D...W",
         "W........W",
         "W........W",
         "W........W",
