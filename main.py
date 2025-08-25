@@ -203,6 +203,10 @@ ENDLOOP""",
             world_map = createRoomWithKeyAndDoor()
             bot_start = (1, 1)
             bot_direction = "S"
+        #elif "turn" in args.program.lower():
+        #   world_map = createCorridorWithTurn()
+        #    bot_start = (8, 1)
+        #    bot_direction = "W"
         else:
             world_map = createSimpleCorridor()
             bot_start = (1, 1)

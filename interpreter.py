@@ -237,7 +237,7 @@ class Parser:
     def __init__(self):
         self.tokens = []
         self.current = 0
-        self.max_nesting_depth = 3
+        self.max_nesting_depth = 10 #上課老師需求改了
         self.max_loop_iterations = 50
     
     def parse(self, tokens: List[Token]) -> List[ASTNode]:
