@@ -230,14 +230,14 @@ def createCorridorWithTurn() -> List[List[str]]:
     """Create corridor map with turns"""
     return [
         "WWWWWWWWWW",
-        "W........W",
-        "W........W",
-        "W........W",
-        "W....WWWWW",
-        "W....W...W",
-        "W....W...W",
-        "W....W...W",
-        "W...EW...W",
+        "W.......EW",
+        "W.WWWWWWWW",
+        "W.W......W",
+        "W.W......W",
+        "W.W......W",
+        "W.W......W",
+        "W.W......W",
+        "W.W......W",
         "WWWWWWWWWW"
     ]
 
