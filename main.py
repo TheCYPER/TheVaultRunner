@@ -9,7 +9,7 @@ import sys
 import os
 import argparse
 from pathlib import Path
-from world import World, createSimpleCorridor, createCorridorWithTurn, createRoomWithKeyAndDoor
+from world import World, createSimpleCorridor, createCorridorWithTurn, createRoomWithKeyAndDoor,createTwistedCorridor, createRoomWithKeyDoorExit
 from bot import Bot
 from interpreter import Interpreter
 
@@ -143,9 +143,47 @@ ENDLOOP""",
             "map": createRoomWithKeyAndDoor(),
             "start": (1, 1),
             "direction": "S",
-            "description": "Collect keys and open doors, then reach the exit"
+            "description": "Collect keys and open doors, then reach the exit",
+            },
+          "twisted_corridor": {
+            "source": """LOOP 50:
+  IF FRONT_CLEAR:
+    MOVE
+  ELSE:
+    RIGHT
+  ENDIF
+  IF AT_EXIT:
+    END
+  ENDIF
+ENDLOOP""",
+        "map": createTwistedCorridor(),
+        "start": (6, 8),
+        "direction": "N",
+        "description": "Navigate a twisted corridor to reach the exit" 
+        },
+        "key_door_exit": {
+            "source": """LOOP 50:
+  IF ON_KEY:
+    PICK
+  ENDIF
+  IF AT_DOOR AND HAVE_KEY:
+    OPEN
+  ENDIF
+  IF FRONT_CLEAR:
+    MOVE
+  ELSE:
+    RIGHT
+  ENDIF
+  IF AT_EXIT:
+    END
+  ENDIF
+ENDLOOP""",
+    "map": createRoomWithKeyDoorExit(),
+    "start": (1, 1),
+    "direction": "S",
+    "description": "Pick up key, open door, then reach the exit"
+}  
         }
-    }
     
     if args.list_examples:
         print("Available example programs:")

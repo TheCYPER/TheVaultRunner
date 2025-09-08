@@ -270,3 +270,33 @@ def createComplexMaze() -> List[List[str]]:
         "W......E.W",
         "WWWWWWWWWW"
     ] 
+
+def createTwistedCorridor() -> List[List[str]]:
+    """Twisted corridor map"""
+    return [
+        "WWWWWWWWWW",
+        "W........W",
+        "W.WWWWWW.W",
+        "W.W....W.W",
+        "W.W....W.W",
+        "W.W....W.W",
+        "W.W....W.W",
+        "W.WWWWWW.W",
+        "W......WEW",
+        "WWWWWWWWWW"
+    ]
+
+def createRoomWithKeyDoorExit() -> List[List[str]]:
+    """Room map with key, door, and exit"""
+    return [
+        "WWWWWWWWWW",
+        "W..K.....W",
+        "W........W",
+        "W....D...W",
+        "W........W",
+        "W........W",
+        "W........W",
+        "W........W",
+        "W.......EW",
+        "WWWWWWWWWW"
+    ]
